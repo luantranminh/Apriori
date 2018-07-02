@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="http://code.jquery.com/jquery-1.12.1.min.js"></script>
+    <script src="dist/js/tabular-input.js"></script>
+    <link type='text/css' rel='stylesheet' href='dist/css/tabular-input.min.css' />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+<style type="text/css">
+    body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #373a3c;
+        background-color: #fff;
+    }
+</style>
+
+<body>
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home"
+                aria-selected="true">Tính reduct</a>
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile"
+                aria-selected="false">Tập phổ biến và luật kết hợp</a>
+            <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact"
+                aria-selected="false">Contact</a>
+        </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+            <br>
+            <div class="container reduct ">
+                <div id="reduct">
+
+                </div>
+                <hr>
+
+                <div id="matrix">
+                    <h5>Ma trận phân biệt</h5>
+                </div>
+                <hr>
+                <div id="reduct-result"></div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+            <h1>Bài tập thực hành 1</h1>
+            <h6>Thuật toán sử dụng : Apriori</h6>
+            <h6>Hạn chế : phải nhập dữ liệu bằng tay</h6>
+            <p style="font-size: 10px">Phải có mạng để chạy thư viện online (bootstrap, jquery).</p>
+            <div class="container">
+                <div id="demo-2">
+                </div>
+                <br>
+                <br>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Ngưỡng phổ biến</span>
+                    </div>
+                    <input type="text" class="form-control" id="minsupp" placeholder="Ngưỡng hỗ trợ" aria-describedby="basic-addon2" value="40">
+                    <div class="input-group-append">
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Độ tin cậy</span>
+                    </div>
+                    <input type="text" class="form-control" id="mincof" placeholder="Độ tin cậy" aria-describedby="basic-addon2" value="70">
+                    <div class="input-group-append">
+                        <span class="input-group-text">%</span>
+                    </div>
+                </div>
+
+                <button type='button' onClick='addRow()' class="btn btn-primary">Thêm giao dịch</button>
+                <button type='button' onClick='javascript:$("#demo-2").tabularInput("deleteRow")' class="btn btn-primary">Xóa giao dịch</button>
+                <button type='button' onClick='setItem()' class="btn btn-primary">Tính toán</button>
+                <br>
+                <br>
+                <div id="content" contenteditable="true">
+                    <strong>Tập phổ biến</strong>
+                    <div>
+                        <br>
+                    </div>
+                </div>
+                <hr>
+                <h6>Lý do chọn javascipt là vì dễ dàng chạy không cần cài đặt môi trường hoặc công cụ nào khác.</h6>
+                <p>
+                    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false"
+                        aria-controls="collapseExample">
+                        Kiến thức sử dụng
+                    </button>
+                </p>
+
+                <div class="collapse" id="collapseExample">
+                    <div class="card card-body">
+                        <a target="_blank" href="https://getbootstrap.com/docs/4.0/components/collapse/">Bootstrap 4</a>
+                        <a target="_blank" href="https://www.jqueryscript.net/table/Spreadsheet-like-Tabular-Data-Manipulation-Plugin-Tabular-Input.html">Spreadsheet-like Tabular</a>
+                        <a target="_blank" href="http://www.codeding.com/?article=13">Apriori Algorithm</a>
+                        <a target="_blank" href="https://www.youtube.com/watch?v=7JlgUx02i-c">Khai thác dữ liệu: Quy trình khai thác luật kết hợp</a>
+                        <p></p>
+                    </div>
+                </div>
+
+            </div>
+            <hr>
+        </div>
+
+        <div hidden class="hidden-class"></div>
+    </div>
+    <script>
+        //////////////////////////////////////////////////////////////////////////
+        var resultFromWorm;
+        var loopCounter = 0;
+        var reductString = '';
+        var reductArray = [];
+        //Reduct
+        jQuery('#reduct').tabularInput({
+            'rows': 8,
+            'columns': 7,
+            'animate': true,
+            'columnHeads': ['TT', 'Tên người', 'Màu tóc', 'Chiều cao', 'Cân nặng', 'Dùng thuốc', 'Kết quả']
+        });
+
+        var reduct_table = [
+            { "ten": "Hoa", "toc": "Đen", "cao": "Tầm thước", "nang": "Nhẹ", "thuoc": "Không", "kq": "Bị nám" },
+            { "ten": "Lan", "toc": "Đen", "cao": "Cao", "nang": "Vừa phải", "thuoc": "Có", "kq": "Không" },
+            { "ten": "Xuân", "toc": "Râm", "cao": "Thấp", "nang": "Vừa phải", "thuoc": "Có", "kq": "Không" },
+            { "ten": "Hạ", "toc": "Đen", "cao": "Thấp", "nang": "Vừa phải", "thuoc": "Không", "kq": "Bị nám" },
+            { "ten": "Thu", "toc": "Bạc", "cao": "Tầm thước", "nang": "Nặng", "thuoc": "Không", "kq": "Bị nám" },
+            { "ten": "Đông", "toc": "Râm", "cao": "Cao", "nang": "Nặng", "thuoc": "Không", "kq": "Không" },
+            { "ten": "Mơ", "toc": "Râm", "cao": "Tầm thước", "nang": "Nặng", "thuoc": "Không", "kq": "Không" },
+            { "ten": "Đào", "toc": "Đen", "cao": "Thấp", "nang": "Nhẹ", "thuoc": "Có", "kq": "Không" }
+        ];
+
+        function setIdReduct() {
+            let tidReduct = $('#reduct tr');
+
+            //set tid
+            for (let i = 1; i < tidReduct.length; i++) {
+                for (let j = 0; j < tidReduct[i].cells.length; j++) {
+                    let getInput = tidReduct[i].cells[j].getElementsByTagName("input")[j];
+                    if (j == 0) {
+                        getInput.value = i;
+                        getInput.setAttribute('disabled', 'disabled');
+                    }
+                }
+            }
+
+            //set sample of table reduct
+            let colunms = tidReduct[0].cells;
+            for (let i = 1; i < colunms.length; i++) {
+                for (let j = 1; j < tidReduct.length; j++) {
+                    let var1 = tidReduct[j].cells[i];
+                    let var2;
+                    switch (i) {
+                        case 1:
+                            var2 = reduct_table[j - 1].ten;
+                            break;
+                        case 2:
+                            var2 = reduct_table[j - 1].toc;
+                            break;
+                        case 3:
+                            var2 = reduct_table[j - 1].cao;
+                            break;
+                        case 4:
+                            var2 = reduct_table[j - 1].nang;
+                            break;
+                        case 5:
+                            var2 = reduct_table[j - 1].thuoc;
+                            break;
+                        case 6:
+                            var2 = reduct_table[j - 1].kq;
+                            break;
+                        default:
+                            var2 = reduct_table[j - 1].ten;
+                            break;
+                    }
+                    tidReduct[j].cells[i].getElementsByTagName("input")[0].value = var2;
+                }
+            }
+        }
+
+        function drawMatrix() {
+            let rows = 9;
+            let columns = 9;
+
+            var table = document.createElement('table');
+            table.setAttribute('border', '1');
+            table.setAttribute('width', '100%')
+
+            for (let i = 0; i < rows; i++) {
+                var row = table.insertRow(i);
+
+                for (j = 0; j < columns; j++) {
+                    //var text = document.createTextNode(`o${j+1}`);
+                    var cell = row.insertCell(j);
+                    cell.setAttribute('align', 'center')
+                    //cell.appendChild(text);
+                }
+            }
+            document.getElementById("matrix").appendChild(table);
+
+            //set header follow vertical
+            let headerVert = $('#matrix tr:first-child')[0].cells;
+            for (let i = 0; i < headerVert.length - 1; i++) {
+                headerVert[i + 1].innerHTML = `o${i + 1}`;
+            }
+            //set header follow horizontal
+            let headerHorz = $('#matrix tr td:first-child');
+            for (let i = 0; i < headerHorz.length - 1; i++) {
+                headerHorz[i + 1].innerHTML = `o${i + 1}`;
+            }
+
+            //just for demotration :'(
+            for (let i = 0; i < headerVert.length; i++) {
+                for (let j = 1; j < i; j++) {
+                    let diff = '';
+                    if (typeof (reduct_table[i - 1]) == "undefined" && reduct_table[i - 1] == null) {
+                        continue;
+                    }
+                    if (typeof (reduct_table[j - 1]) == "undefined" && reduct_table[j - 1] == null) {
+                        continue;
+                    }
+                    let temp1 = reduct_table[i - 1].kq;
+                    let temp2 = reduct_table[j - 1].kq;
+                    let temp3 = reduct_table[j - 1];
+                    let temp4 = reduct_table[i - 1];
+                    if (reduct_table[i - 1].kq == reduct_table[j - 1].kq) {
+                        $('#matrix tr')[i].cells[j].innerHTML = '&';
+                        continue;
+                    }
+                    else {
+                        if (reduct_table[i - 1].toc != reduct_table[j - 1].toc) {
+
+                            diff = diff + ', toc';
+                        };
+                        if (reduct_table[i - 1].cao != reduct_table[j - 1].cao) {
+                            diff = diff + ', cao';
+                        };
+                        if (reduct_table[i - 1].nang != reduct_table[j - 1].nang) {
+                            diff = diff + ', nang';
+                        };
+                        if (reduct_table[i - 1].thuoc != reduct_table[j - 1].thuoc) {
+                            diff = diff + ', thuoc';
+                        };
+                        if (diff != '') {
+                            diff = diff.substring(2, diff.length)
+                        }
+                        $('#matrix tr')[i].cells[j].innerHTML = diff;
+                        reductArray.push(diff.split(","));
+                        reductString = reductString + ' AND ' + '(' + diff + ')';
+
+                    }
+
+                }
+            }
+        }
+
+
+
+        drawMatrix()
+
+
+        setIdReduct();
+
+        function isArrayInArray(arr, item) {
+            var item_as_string = JSON.stringify(item);
+
+            var contains = arr.some(function (ele) {
+                return JSON.stringify(ele) === item_as_string;
+            });
+            return contains;
+        }
+
+
+        function minimalStringReduct() {
+            for (let i = 0; i < reductArray.length; i++) {
+                for (let j = i + 1; j < reductArray.length; j++) {
+                    if (reductArray[j].every(val => reductArray[i].includes(val))) {
+                        reductArray[i] = reductArray[j];
+                    } else {
+                        if (reductArray[i].every(val => reductArray[j].includes(val))) {
+                            reductArray[j] = reductArray[i];
+                        }
+                    }
+
+                }
+            }
+        }
+
+        function uniq(a) {
+            return a.sort().filter(function (item, pos, ary) {
+                return !pos || item != ary[pos - 1];
+            })
+        }
+
+        minimalStringReduct();
+        reductArray = uniq(reductArray);
+        reductString = '';
+        for (let i = 0; i < reductArray.length; i++) {
+            for (let j = 0; j < reductArray[i].length; j++) {
+
+                if (reductArray[i].length == 1) { reductString += '(' + reductArray[i][j] + ')'; }
+                else {
+                    if (j == 0) {
+                        reductString += '( ' + reductArray[i][j] + ' OR';
+                    } else
+                        if (j == reductArray[i].length - 1) {
+                            reductString += reductArray[i][j] + ' )';
+                        } else
+                            reductString += reductArray[i][j] + ' OR ';
+                }
+            }
+            if (i == reductArray.length - 1) continue;
+            reductString += ' AND ';
+        };
+        function requestForReduct(reductString) {
+            let formular = 'F AND  (C OR  D) AND  (N OR  F)';
+
+            // let url = 'https://cors.io/?https://www.wolframalpha.com/widget/input/?input=' + formular + '&id=4c86f3bbcab249f879058d1825887571&includepodid=MinimalForms';
+
+            let url = 'https://cryptic-headland-94862.herokuapp.com/https://www.wolframalpha.com/widget/input/?input=' + reductString + '&id=4c86f3bbcab249f879058d1825887571&includepodid=MinimalForms';
+            fetch(url)
+                .then(
+                    response => response.text()
+
+                ).then(
+                    html => resultFromWorm = html
+                );
+
+            function createElementFromHTML(htmlString) {
+                var div = document.createElement('div');
+                div.innerHTML = htmlString.trim();
+
+                console.log(div);
+                return div.firstChild;
+            }
+        }
+        reductString = reductString.slice(5, reductString.length);
+        reductString = reductString.replace(/,/g, " OR ");
+
+        reductString = reductString.replace(/cao/g, " X ");
+        reductString = reductString.replace(/toc/g, " Y ");
+        reductString = reductString.replace(/nang/g, " Z ");
+        reductString = reductString.replace(/thuoc/g, " K ");
+
+        requestForReduct(reductString);
+
+        let myLoop = setInterval(function () {
+
+            if ((loopCounter == 0 || loopCounter == 1) && resultFromWorm) {
+                loopCounter++;
+                if (loopCounter == 1) {
+                    $('.hidden-class').html("<div id = 'waitForSelector'></div>");
+                    $('.hidden-class').html($(".hidden-class").html() + resultFromWorm);
+                }
+            };
+
+            if (loopCounter == 3)
+                clearInterval(myLoop);
+        }, 1000);
+
+        function filterReduct() {
+            const regex = /DNF.\|(.+)\\nCNF/gm;
+            let str = $('.hidden-class[1] output[0] img').context.images["0"].alt;
+
+            let m;
+            while ((m = regex.exec(str)) !== null) {
+                // This is necessary to avoid infinite loops with zero-width matches
+                if (m.index === regex.lastIndex) {
+                    regex.lastIndex++;
+                }
+
+                let reduct = m[1];
+                reduct = reduct.replace(/\|\|/g, String.fromCharCode(118));
+                reduct = reduct.replace(/&&/g, String.fromCharCode(94));
+                console.log(reduct);
+
+                reduct = reduct.replace(/X/g, " CAO ");
+                reduct = reduct.replace(/Y/g, " TÓC ");
+                reduct = reduct.replace(/Z/g, " NẶNG ");
+                reduct = reduct.replace(/K/g, " THUỐC ");
+
+                $('#reduct-result').html(reduct);
+            }
+        }
+
+        function waitForElementToDisplay(selector, time) {
+            if (document.querySelector(selector) != null) {
+                filterReduct();
+                return;
+            }
+            else {
+                setTimeout(function () {
+                    waitForElementToDisplay(selector, time);
+                }, time);
+            }
+        }
+
+        waitForElementToDisplay('#waitForSelector', 1000);
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        //Tập phổ biến và luật kết hợp
+
+
+        jQuery('#demo-2').tabularInput({
+            'rows': 6,
+            'columns': 2,
+            'animate': true,
+            'columnHeads': ['TID (mã giao dịch) ', 'Itemset (tập các hạng mục)']
+        });
+
+        var tid = document.querySelector('#demo-2').querySelectorAll('tr');
+        tid[1].cells[1].getElementsByTagName("input")[0].value = 'cheese, diaper, water, bread, umbrella';
+        tid[2].cells[1].getElementsByTagName("input")[0].value = 'diaper, water';
+        tid[3].cells[1].getElementsByTagName("input")[0].value = 'cheese, diaper, milk';
+        tid[4].cells[1].getElementsByTagName("input")[0].value = 'diaper, cheese, detergent';
+        tid[5].cells[1].getElementsByTagName("input")[0].value = 'cheese, milk, beer';
+
+        function setId() {
+            var tid = document.querySelector('#demo-2').querySelectorAll('tr');
+
+            for (var i = 1; i < tid.length; i++) {
+                tid[i].cells[0].getElementsByTagName("input")[0].value = i;
+                tid[i].cells[0].getElementsByTagName("input")[0].setAttribute('disabled', 'disabled');
+            }
+        }
+
+        setId();
+
+        function addRow() {
+            $("#demo-2").tabularInput("addRow");
+            setId();
+        }
+
+        // Add a row at the end
+        $("#demo-2").tabularInput("deleteRow"); // Delete the last row
+
+        var itemSetCollection;
+        var itemSet;
+        var fre;
+
+        function setItem() {
+            $('#content')["0"].innerHTML = '<strong>Tập phổ biến</strong><div><br></div>';
+            var tid = document.querySelector('#demo-2').querySelectorAll('tr');
+            itemSet = new Array()
+            itemSetCollection = new Array();
+            fre = new Array();
+
+            // get itemset into itemSetCollection
+            for (var i = 1; i < tid.length; i++) {
+                itemSetCollection[i - 1] = tid[i].cells[1].getElementsByTagName("input")[0].value;
+
+                itemSetCollection[i - 1] = itemSetCollection[i - 1].split(',');
+                itemSetCollection[i - 1] = itemSetCollection[i - 1].filter(function (n) {
+                    return n != ""
+                }); //remove "" element
+            }
+
+            //remove space ' '
+            for (var i = 0; i < itemSetCollection.length; i++) {
+                for (var j = 0; j < itemSetCollection[i].length; j++) {
+                    //remove space
+                    itemSetCollection[i][j] = itemSetCollection[i][j].replace(/\s+/g, '');
+                    //lowercase them all
+                    itemSetCollection[i][j] = itemSetCollection[i][j].toLowerCase();
+                }
+            }
+
+            for (var i = 0; i < itemSetCollection.length; i++) {
+
+                for (var j = 0; j < itemSetCollection[i].length; j++) {
+                    if (itemSetCollection[i][j] != "")
+                        itemSet.push(itemSetCollection[i][j]);
+                    console.log(itemSetCollection[i][j])
+                }
+            }
+
+            itemSet = Array.from(new Set(itemSet));
+
+            //find all subset
+            function getCombinations(array) {
+
+                function fork(i, t) {
+                    if (i === array.length) {
+                        result.push(t);
+                        return;
+                    }
+                    fork(i + 1, t.concat([array[i]]));
+                    fork(i + 1, t);
+                }
+
+                var result = [];
+                fork(0, []);
+                return result;
+            }
+
+            itemSet = getCombinations(itemSet);
+
+            // tat ca 
+            for (var i = 0; i < itemSet.length; i++) {
+                fre[i] = 0;
+            }
+
+            for (var i = 0; i < itemSetCollection.length; i++) {
+                var target = itemSetCollection[i];
+
+                for (var j = 0; j < itemSet.length; j++) {
+                    var check = itemSet[j];
+
+                    if (itemSet[j].length == 0) {
+                        continue;
+                    }
+
+                    var found = check.every(r => target.includes(r));
+                    var aaaaa = fre;
+                    if (found == true) {
+                        fre[j] = +fre[j] + 1;
+                    }
+                }
+
+            }
+
+            for (var i = 0; i < itemSet.length; i++) {
+                if (((fre[i] / itemSetCollection.length) * 100) >= document.getElementById('minsupp').value) {
+                    var sup = Math.round((fre[i] / itemSetCollection.length) * 100);
+                    $('#content')["0"].innerHTML += itemSet[i] + ' độ phổ biến ' + sup + '%';
+                    $('#content')["0"].innerHTML += '<br>';
+                }
+            }
+
+            $('#content')["0"].innerHTML += '<br>';
+            $('#content')["0"].innerHTML += '<strong>Luật Kết Hợp</strong><div><br></div>';
+            var cof;
+
+            for (var i = 0; i < itemSet.length; i++) {
+                if (((fre[i] / itemSetCollection.length) * 100) >= document.getElementById('minsupp').value) {
+                    if (itemSet[i].length > 1) {
+                        var sup = Math.round((fre[i] / itemSetCollection.length) * 100);
+                        var _itemSubSet = getCombinations(itemSet[i]);
+
+                        _itemSubSet = _itemSubSet.filter(function (e) {
+                            return e.length !== 0
+                        })
+
+                        for (var k = 0; k < _itemSubSet.length; k++) {
+                            //itemSet[i] -  _itemSubSet[k]
+                            var diff = itemSet[i].filter(x => _itemSubSet[k].indexOf(x) < 0);
+
+                            if (diff.length == 0) continue;
+
+                            for (var m = 0; m < itemSet.length; m++) {
+
+                                // check if array1 = array2
+                                var is_same = itemSet[m].length == _itemSubSet[k].length && itemSet[m].every(function (element, index) {
+                                    //return element === array2[index];
+                                    if (_itemSubSet[k].indexOf(element) > -1) {
+                                        return element = _itemSubSet[k][_itemSubSet[k].indexOf(element)];
+                                    }
+                                });
+
+                                if (is_same) {
+                                    conf = ((fre[i] / itemSetCollection.length) / (fre[m] / itemSetCollection.length)) * 100;
+                                    if (conf > document.getElementById('mincof').value) {
+                                        $('#content')["0"].innerHTML += _itemSubSet[k] + '=>' + diff + ' độ tin cậy ' + Math.round(conf) + '%';
+                                        $('#content')["0"].innerHTML += '<br>';
+                                    }
+
+                                } else {
+                                    conf = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    </script>
+</body>
+
+</html>
